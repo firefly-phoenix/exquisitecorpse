@@ -3,6 +3,11 @@ import ReactDOM from 'react-dom';
 import Ms from 'pretty-ms';
 import './App.css';
 
+//VARIABLES/ARRAYS
+//let stringify = "";
+// let charactercheck = "";
+// let highlighted = "";
+// let unhighlighted = "";
 
 function Time(props) {
   console.log("timerhit0 is operating", );
@@ -111,6 +116,7 @@ function AddNewText(props) {
 //START OF GAME CLASS
 
 class Game extends React.Component {
+
   constructor(props) {
     super(props);
 
@@ -127,7 +133,11 @@ class Game extends React.Component {
       time: -6000,
       start: 0,
       isOn: false,
-      toDisplay: 'timer'
+      toDisplay: 'timer',
+
+      charactercheck: "",
+      highlighted: "",
+      unhighlighted: "",
 
     };
     //Timer
@@ -152,6 +162,37 @@ class Game extends React.Component {
       })
       .then(res => {
         console.log("setting state to", res)
+
+        //hidden story vs shown story
+
+
+        for(let i = 0; i < res.length; i++) {
+          this.state.charactercheck += res[i];
+          console.log("this is the charactercheck:", this.state.charactercheck);
+        }
+
+        for(let i = 0; i < this.state.charactercheck.length; i += this.state.charactercheck.length - 7){
+           //console.log("adding spaces");
+
+           //Taken from: https://stackoverflow.com/questions/5884353/how-to-insert-a-character-in-a-string-at-a-certain-position
+           this.state.highlighted = this.state.charactercheck.substring(0, i);
+           this.state.unhighlighted = this.state.charactercheck.substring(i, this.state.charactercheck.length);
+        }
+        console.log("unhighlighted:", this.state.unhighlighted);
+        console.log("highlighted:", this.state.highlighted);
+
+      //})
+
+        /*
+        for(let i = 0; i < this.state.story.length; i++) {
+          fullString += this.state.story[i];
+          console.log("this is the fullstring:", fullString);
+        }
+
+        */
+
+
+
         this.setState({story:res});
 
         // this.setState({squares:res.squares});
@@ -166,11 +207,13 @@ class Game extends React.Component {
 
 
 
+
 //EVENT HANDLERS
 
 //handles the setting of the itemName variable to reflect what the user is
 //inputting
   handleInputNewStory(event) {
+    //console.log("NEW HIGHLIGHTED TEST:", this.state.highlighted);
     console.log(event.target.value)
 
     //sets the value of itemName to whatever the user has input
@@ -217,16 +260,41 @@ this.setState({
         body: JSON.stringify ({
           //replace with 'newItem'
           'input' : this.state.input,
+          //'charactercheck' this.state.charactercheck,
         }),
       })
-      .then(res => {
-        // render(){
-        //
-        //   return(
-        //
-        //   );
-        // }
-      })
+
+      // .then (res => {
+      //   // let storyString = [];
+      //   // for(let i=0; i<=this.state.story.length; i++){
+      //   //   storyString.push(this.state.story[i]);
+      //   // }
+      //
+      //   stringify = "";
+      //   stringify = JSON.stringify(this.state.story);
+      //
+      //   console.log("new story formatting:", stringify);
+      // })
+
+      // .then(
+      //
+      //   let charactercheck = this.state.story;
+      //   let highlightedportion = charactercheck.length - 3;
+      //   console.log("double checking the function of this submit: ", charactercheck , highlightedportion);
+      //
+      //   return(
+      //     <div>
+      //
+      //       <div
+      //       id = "highlightedtext"
+      //       >
+      //
+      //       {highlightedportion}
+      //       </div>
+      //     </div>
+      //   );
+      // )
+
 
       //POSSIBLY ADD THIS IN
       // .then(res => {
@@ -239,11 +307,34 @@ this.setState({
       //   }
       // })
 
+      //.then(res => this.handleHighlightText())
+      .then(res => {
+        console.log("the res is:", res);
+        this.callAPI()
 
-      .then(res => this.callAPI())
+      })
       .then(res => this.setState({input:""}))
     //}
     }
+
+    // handleHighlightText(){
+    //   let charactercheck = this.state.story;
+    //   let highlightedportion = charactercheck.length - 3;
+    //
+    //   return (
+    //     <div>
+    //
+    //       <div
+    //       id = "highlightedtext"
+    //       >
+    //
+    //       {highlightedportion}
+    //       </div>
+    //     </div>
+    //   );
+    // }
+
+
 
     handleDeleteItem(i){
 
@@ -251,7 +342,7 @@ this.setState({
       const story = this.state.story.slice();
 
       //sets the value of one item to a specific itemName
-      story[i] = this.state.input;
+      //story[i] = this.state.input;
       this.setState({
         story: story,
       })
@@ -264,10 +355,21 @@ this.setState({
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify ({
           //'itemName' : this.state.itemName,
-          'story' : this.state.story[i],
+          'story' : this.state.story/*[i]*/,
+          // 'charactercheck' : this.state.charactercheck,
+          // 'highlighted' : this.state.highlighted,
+          // 'unhighlighted' : this.state.unhighlighted,
         }),
       })
       .then(res => this.callAPI())
+      // .then(res => {
+      //   this.setState({
+      //     charactercheck: "",
+      //     highlighted: "",
+      //     unhighlighted: "",
+      //
+      //   })
+      // })
 
     }
 
@@ -325,36 +427,6 @@ this.setState({
 
 
 
-//ORIGINAL START TIMER CODE:
-/*
-startTimer() {
-
-  this.setState({
-
-    //time: Date.now() - this.state.start,
-    time: this.state.time,
-    //time: -this.state.time,
-    start: Date.now() + this.state.time,
-    isOn: true
-  })
-
-
-  this.timer = setInterval(() => this.setState({
-    //time: this.setState.time,
-    time: Date.now() - this.state.start
-  }), 1);
-
-  //determining whether the timer should be turned off
-  if(this.state.time === 0) {
-    this.resetTimer()
-
-  }
-
-
-}
-*/
-
-
 
 
 //TIMER CODE PARTIALLY COPIED FROM THIS "MEDIUM" ARTICLE: https://medium.com/@650egor/react-30-day-challenge-day-1-simple-timer-df85d0867553
@@ -398,19 +470,7 @@ startTimer() {
 
 
   render(){
-      // console.log("** THE TIME IS: ", this.state.time);
-      // console.log("Date.now is: ", Date.now());
 
-      //Pushes all parts of the Item function into a single array and renders
-
-      //uncomment this if text does not work
-      /*
-      let storyList = [];
-      console.log(this.state.story)
-      for(let i = 0; i < this.state.story.length; i++){
-        storyList.push(this.renderText(i))
-      }
-      */
 
 //______________________________________________________________________________
       //Timer
@@ -418,15 +478,7 @@ startTimer() {
       console.log("timer is working");
 
 
-      // let resume = (this.state.time !== 0 && !this.state.isOn) ?
-      //   <button onClick={this.startTimer}>resume</button> :
-      //   null
 
-      // let stop = (this.state.isOn) ?
-      //   <button onClick={this.stopTimer}>stop</button> :
-      //   null
-
-      //60000
 
        //TIMER CODE PARTIALLY COPIED FROM THIS "MEDIUM" ARTICLE: https://medium.com/@650egor/react-30-day-challenge-day-1-simple-timer-df85d0867553
 
@@ -453,37 +505,30 @@ startTimer() {
 
         let consolelog = console.log("the buttons are working");
 
+        //let charactercheck = this.state.story;
+        //let highlightedportion = charactercheck.length - 3;
 
-        /*
+        // var charactercheck = res;
+        //  for(let i = 0; i < charactercheck.length; i+=50){
+        //    console.log("adding spaces");
 
-        <h3
-        id= "timerID"
-        >
-        timer: {Ms(this.state.time)}
-        </h3>
+           //Taken from: https://stackoverflow.com/questions/5884353/how-to-insert-a-character-in-a-string-at-a-certain-position
 
-        */
+        // let charactercheck1 = this.state.story.substring(0, this.state.story.length - 3);
+        // let charactercheck2 = this.state.story.substring(this.state.story.length - 3, this.state.story.length);
+        // let renderedstory = charactercheck1 + charactercheck2;
 
-        // <TimerHit0
-        //   handleSubmit = {this.handleSubmit.bind(this)}
-        //   time={this.state.time}
-        // />
+         //}
 
-/*
-        <Time
-          handleSubmit = {this.handleSubmit.bind(this)}
-          resetTimer = {this.handleSubmit.bind(this)}
-          resetTimer={() => this.resetTimer()}
-          time={this.state.time}
-          //key={i}
-        />
 
-        <h3
-        id= "timerID"
-        >
-          timer: {Ms(this.state.time)}
-        </h3>
-*/
+            //id = "highlightedtext"
+
+        // partially from _____
+        // setState({
+        //   this.state.story.join(''); // 'abc'
+        // })
+
+        //this.state.story.join(''); // 'abc'
 
 
 //TIMER CODE PARTIALLY COPIED FROM THIS "MEDIUM" ARTICLE: https://medium.com/@650egor/react-30-day-challenge-day-1-simple-timer-df85d0867553
@@ -509,10 +554,13 @@ startTimer() {
           >
             <Text
             // change to .story
+
+              //text={this.state.highlighted + this.state.unhighlighted}
+              //change back to code below??
               text={this.state.story}
-              //key={i}
+
             />
-            {/*storyList*/}
+
           </div>
 
           <div
@@ -526,7 +574,7 @@ startTimer() {
 
             <button
 
-              //onClick={() => props.handleDeleteItem()}
+              onClick={() => this.handleDeleteItem()}
               className="startBtn"
 
             >
@@ -545,9 +593,6 @@ startTimer() {
 
 }
 
-// <Footer
-//
-// />
 
 
 class App extends React.Component {
@@ -567,211 +612,3 @@ class App extends React.Component {
 
 // =============================================================================
 export default App;
-
-
-
-
-//______________________________________________________________________________
-
-//Original timer CODE
-
-/*
-
-class Timer extends React.Component {
-
-
-  constructor(props){
-    super(props)
-    this.state = {
-      time: 0,
-      start: 0,
-      isOn: false,
-      toDisplay: 'timer'
-    }
-    this.startTimer = this.startTimer.bind(this)
-    //this.stopTimer = this.stopTimer.bind(this)
-    this.resetTimer = this.resetTimer.bind(this)
-  }
-  startTimer() {
-    this.setState({
-      time: this.state.time,
-      start: Date.now() - this.state.time,
-      isOn: true
-    })
-    this.timer = setInterval(() => this.setState({
-      time: Date.now() - this.state.start
-    }), 1);
-  }
-  // stopTimer() {
-  //   this.setState({isOn: false})
-  //   clearInterval(this.timer)
-  // }
-  resetTimer() {
-    this.setState({isOn:false})
-    clearInterval(this.timer)
-
-    this.setState({time: 0})
-  }
-  render() {
-    console.log("timer is working");
-
-    let start = (this.state.time == 0) ?
-      <button
-      onClick={this.startTimer}
-      className="startBtn"
-      >
-      start
-      </button> :
-      null
-    // let stop = (this.state.isOn) ?
-    //   <button onClick={this.stopTimer}>stop</button> :
-    //   null
-    let reset = (this.state.time != 0 && !this.state.isOn) ?
-      <button
-      onClick={this.resetTimer}
-      className="refreshBtn"
-      >
-      reset
-      </button> :
-      null
-    // let resume = (this.state.time != 0 && !this.state.isOn) ?
-    //   <button onClick={this.startTimer}>resume</button> :
-    //   null
-    if(this.state.toDisplay === 'timer'){
-      return(
-        <div>
-
-          <h3
-          id= "timerID"
-          >
-          timer: {this.state.time}
-          </h3>
-        </div>
-      )
-    }
-    else {
-      console.log('returning start stop')
-      return(
-        <div>
-          <div>
-            {this.start}
-            {this.reset}
-          </div>
-        </div>
-      )
-    }
-
-  }
-}
-*/
-
-
-
-
-/*
-
-function StartStop(props){
-  console.log("start stop is running");
-
-    let start = (props.time == 0) ?
-      <button
-      onClick={props.start}
-      className="startBtn"
-      >
-      start
-      </button> :
-      null
-    // let stop = (this.state.isOn) ?
-    //   <button onClick={this.stopTimer}>stop</button> :
-    //   null
-    let reset = (props.time != 0 && !props.on) ?
-      <button
-      onClick={props.reset}
-      className="refreshBtn"
-      >
-      reset
-      </button> :
-      null
-    return (
-      <div>
-        {start}
-        {reset}
-      </div>
-
-    );
-
-
-}
-
-class Timer extends React.Component {
-
-
-  constructor(props){
-    super(props)
-    this.state = {
-      time: 0,
-      start: 0,
-      isOn: false,
-      toDisplay: 'timer'
-    }
-    this.startTimer = this.startTimer.bind(this)
-    //this.stopTimer = this.stopTimer.bind(this)
-    this.resetTimer = this.resetTimer.bind(this)
-  }
-  startTimer() {
-    this.setState({
-      time: this.state.time,
-      start: Date.now() - this.state.time,
-      isOn: true
-    })
-    this.timer = setInterval(() => this.setState({
-      time: Date.now() - this.state.start
-    }), 1);
-  }
-  // stopTimer() {
-  //   this.setState({isOn: false})
-  //   clearInterval(this.timer)
-  // }
-  resetTimer() {
-    this.setState({isOn:false})
-    clearInterval(this.timer)
-
-    this.setState({time: 0})
-  }
-  render() {
-    console.log("timer is working");
-
-
-    // let resume = (this.state.time != 0 && !this.state.isOn) ?
-    //   <button onClick={this.startTimer}>resume</button> :
-    //   null
-
-      return(
-        <div>
-
-          <h3
-          id= "timerID"
-          >
-          timer: {this.state.time}
-          </h3>
-
-          <div>
-            <StartStop
-              start = {this.startTimer()}
-              reset = {this.resetTimer()}
-              time = {this.state.time}
-              on = {this.state.isOn}
-            />
-
-
-          </div>
-
-
-        </div>
-      );
-
-
-  }
-}
-
-*/
